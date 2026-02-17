@@ -6,7 +6,7 @@
 /*   By: jmafueni <jmafueni@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 18:58:47 by jmafueni          #+#    #+#             */
-/*   Updated: 2026/02/17 19:37:31 by jmafueni         ###   ########.fr       */
+/*   Updated: 2026/02/17 21:06:08 by jmafueni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,10 @@ void parse(const std::string& line, ParsedCommand& parse)
 	
 }
 
+
 void botfilterMessage(ParsedCommand& parse, std::string& message, const std::string& filename)
 {
-	std::ifstream file(filename.c_str());
+		std::ifstream file(filename.c_str());
 	if (!file.is_open())
 	{
 		std::cerr << "Error: Could not open file " << filename << std::endl;
@@ -54,37 +55,77 @@ void botfilterMessage(ParsedCommand& parse, std::string& message, const std::str
 	std::string banned;
 	while (std::getline(file, banned))
 	{
+		if (banned.empty())
+			continue;
+
 		size_t pos = 0;
-        std::cout << "here" << std::endl;
+
 		while ((pos = message.find(banned, pos)) != std::string::npos)
 		{
-			std::string mask(banned.size(), '*');
-			message.replace(pos, banned.size(), mask);
-			pos += mask.size();
+			bool validLeft = (pos == 0 || message[pos - 1] == ' ');
+			bool validRight =
+				(pos + banned.length() >= message.length() ||
+				message[pos + banned.length()] == ' ');
 
-			std::cout << "WARNING: be polite please, respect the channel rules" << std::endl;
-            parse.ban = true;
+			if (validLeft && validRight)
+			{
+				std::string mask(banned.length(), '*');
+				message.replace(pos, banned.length(), mask);
+				pos += mask.length();
+
+				parse.ban = true;
+
+				std::cout << "WARNING: be polite please, respect the channel rules"
+						<< std::endl;
+			}
+			else
+				pos++;
 		}
-        // if (parse.ban = true)
-        // {
-        //     parse.ban_word = banned;
-        //     break;
-        // }
 	}
+// 	std::ifstream file(filename.c_str());
+// 	if (!file.is_open())
+// 	{
+// 		std::cerr << "Error: Could not open file " << filename << std::endl;
+// 		return;
+// 	}
+
+// 	std::string banned;
+// 	while (std::getline(file, banned))
+// 	{
+// 		size_t pos = 0;
+// 		while ((pos = message.find(banned, pos)) != std::string::npos)
+// 		{
+// 			if (pos == 0 && (message[pos - 1] != ('\0' || ' ') || message[banned.size() + 1] != ('\0' || ' ')))
+// 				break;
+// 			std::string mask(banned.size(), '*');
+// 			message.replace(pos, banned.size(), mask);
+// 			pos += mask.size();
+// 			if (!pos)
+// 				break;
+			
+// 			std::cout << "WARNING: be polite please, respect the channel rules" << std::endl;
+// 			parse.ban = true;
+// 		}
+// 		if (parse.ban = true)
+// 		{
+// 			parse.ban_word = banned;
+// 			break;
+// 		}
+// 	}
 }
 
-int main()
-{
-    ParsedCommand parse;
-    std::string str = "bonjour con te e";
+// int main()
+// {
+//     ParsedCommand parse;
+//     std::string str = " concombre ";
 
-    parse.command.clear();
-	parse.params.clear();
-	parse.trailing.clear();
-	parse.ban = false;
+//     parse.command.clear();
+// 	parse.params.clear();
+// 	parse.trailing.clear();
+// 	parse.ban = false;
     
-    botfilterMessage(parse, str, "banned_word.txt");
-}
+//     botfilterMessage(parse, str, "banned_word.txt");
+// }
 
 // IRCMessage  parseIRCMessage(const std::string& rawInput){
 //     IRCMessage  msg;
