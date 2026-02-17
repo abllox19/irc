@@ -1,0 +1,60 @@
+# ===== Insultes =====
+con
+connard
+connasse
+idiot
+abruti
+imbecile
+debile
+stupide
+cretin
+fils de pute
+fdp
+pute
+putes
+petasse
+petasses
+tg
+ta gueule
+ferme la
+sale type
+sale con
+bouffon
+
+# ===== Vulgarités =====
+merde
+putain
+bordel
+encule
+enculer
+enculee
+nique
+niquer
+niqué
+chiant
+chier
+bite
+couilles
+
+# ===== Discrimination / haine =====
+
+pd
+tafiole
+hitler
+sale arabe
+sale noir
+sale juif
+sale blanc
+sale asiat
+
+
+# ===== Spam / flood =====
+free money
+click here
+subscribe now
+crypto scam
+airdrop
+win money
+http://
+https://
+www.
