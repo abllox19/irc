@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRC_Serveur.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: abllox <abllox@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 13:24:03 by idioumas          #+#    #+#             */
-/*   Updated: 2025/09/07 15:25:49 by marvin           ###   ########.fr       */
+/*   Updated: 2026/02/18 20:13:26 by abllox           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 /*utils*/
 
 #include "Client.hpp"
+#include "bot.hpp"
 
 class IRC_Serveur
 {

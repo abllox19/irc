@@ -27,6 +27,7 @@ enum Command {
     CMD_JOIN,
     CMD_PART,
     CMD_PRIVMSG,
+    CMD_BOT,
     CMD_KICK,
     CMD_INVITE,
     CMD_TOPIC,
@@ -47,6 +48,7 @@ Command parse_command(const char *buffer, Client client)
     if (!strcmp(buffer, "JOIN")) return CMD_JOIN;
     if (!strcmp(buffer, "PART")) return CMD_PART;
     if (!strcmp(buffer, "PRIVMSG")) return CMD_PRIVMSG;
+    if (!strcmp(buffer, "BOT")) return CMD_BOT;
     if (!strcmp(buffer, "KICK")) return CMD_KICK;
     if (!strcmp(buffer, "INVITE")) return CMD_INVITE;
     if (!strcmp(buffer, "TOPIC")) return CMD_TOPIC;
@@ -107,6 +109,7 @@ void IRC_Serveur::run()
     ParsedCommand IRC;
     std::vector<Client> clients;
     std::vector<Chanel> chanels;
+    Bot bot;
 
     fd_set master_set, read_set;
     signal(SIGINT,leave_irc);
@@ -277,6 +280,18 @@ void IRC_Serveur::run()
                             case CMD_PRIVMSG:
                                 privmsg(clients, IRC.params, clients[i], chanels, IRC.command);
                                 break;
+
+                            case CMD_BOT:
+                            {
+                                if (IRC.params[0] == "")
+                                {
+                                    send(clients[i].get_fd_client(), "BOT <command>\n", 14, 0);
+                                    break;
+                                }
+	                            std::cout << IRC.params[0] << std::endl;
+                                bot.handleMessage(clients[i], IRC.params[0]);
+                                break;
+                            }
 
                             case CMD_KICK:
                             {

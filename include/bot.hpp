@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   bot.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jmafueni <jmafueni@student.42.fr>          +#+  +:+       +#+        */
+/*   By: abllox <abllox@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 20:42:30 by jmafueni          #+#    #+#             */
-/*   Updated: 2026/02/18 18:01:44 by jmafueni         ###   ########.fr       */
+/*   Updated: 2026/02/18 20:50:52 by abllox           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,14 +22,13 @@ class Bot
 		std::string name;
 
 		void sendPrivMsg(Client& client, const std::string& msg);
-
 		void cmdHello(Client& client);
 		void cmdTime(Client& client);
-		void cmdUsers(Client& client, Server& server);
+		void cmdUsers(Client& client, Chanel& server);
 		void cmdJoke(Client& client, int& i);
 
 	public:
-		Bot(const std::string& name);
+		Bot();
 
-		void handleMessage(Client& client, const ParsedCommand& cmd);
+		void handleMessage(Client& client, std::string& cmd);
 };
