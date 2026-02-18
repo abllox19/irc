@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jmafueni <jmafueni@student.42.fr>          +#+  +:+       +#+        */
+/*   By: abllox <abllox@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 17:37:39 by jmafueni          #+#    #+#             */
-/*   Updated: 2026/02/17 19:19:07 by jmafueni         ###   ########.fr       */
+/*   Updated: 2026/02/18 17:16:59 by abllox           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,8 @@ struct ParsedCommand
 		bool						ban;
 };
 
-void splitTokens(const std::string& str);
-
-void	parse(const std::string& line);
+void	parse(const std::string& line, ParsedCommand& parse);
 void	botfilterMessage(ParsedCommand& parse, std::string& message, const std::string& filename);
-void	bothandlecommand(Client& client, ParsedCommand& msg);
 
 
 // #ifndef PARSING_HPP

@@ -87,11 +87,13 @@ std::string IRC_Serveur::get_password()
     return passwold;
 }
 
-void ft_bzero(IRCMessage &irc)
+void ft_bzero(ParsedCommand &irc)
 {
+    irc.ban_word = "";
     irc.command = "";
-    irc.prefix = "";
-    irc.params.assign(4, "");
+    irc.trailing = "";
+    irc.params.clear();
+    irc.ban = false;
 }
 
 void leave_irc(int sig)
@@ -102,7 +104,7 @@ void leave_irc(int sig)
 
 void IRC_Serveur::run()
 {
-    IRCMessage IRC;
+    ParsedCommand IRC;
     std::vector<Client> clients;
     std::vector<Chanel> chanels;
 
@@ -172,8 +174,10 @@ void IRC_Serveur::run()
                         buffer[bytes - 1] = '\0';
                         std::string ircmsg = buffer;
                         ft_bzero(IRC);
-                        IRC = parseIRCMessage(ircmsg);
-                        if (IRC.prefix != "") continue;
+                        parse(ircmsg, IRC);
+                        botfilterMessage(IRC, IRC.params[0], "banned_word.txt");
+                        // if (IRC.prefix != "") continue;
+                        std::cout << "commande du client " << clients[i].get_nickname() << " : " << IRC.params[0] << std::endl;
                         std::cout << "commande du client " << clients[i].get_nickname() << " : " << buffer << std::endl;
                         Command cmd = parse_command(IRC.command.c_str(), clients[i]);
 
