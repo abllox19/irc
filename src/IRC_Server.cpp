@@ -247,6 +247,7 @@ void IRC_Serveur::run()
                             {
                                 for (size_t p = 0; p < IRC.params.size(); p++)
                                 {
+                                    std::cout << "verif : " << IRC.params[p] << std::endl;
                                     if (IRC.params[p][0] != '#' || !IRC.params[p][1])
                                     {
                                         std::string reply = ":server 407 " + clients[i].get_nickname() + " " + IRC.params[p] + " :chanel started by '#'\r\n";
@@ -283,13 +284,24 @@ void IRC_Serveur::run()
 
                             case CMD_BOT:
                             {
+                                Chanel *chanel_tmp;
+                                if (IRC.params[1] != "")
+                                {
+                                    chanel_tmp = set_chanel(chanels, IRC.params[1], false, clients[i]);
+                                    if (!chanel_tmp)
+                                    {
+                                        std::string reply = ":server 403 " + clients[i].get_nickname() + " " + IRC.params[0] + " :No such channel\r\n";
+                                        send(clients[i].get_fd_client(), reply.c_str(), reply.size(), 0);
+                                        break;
+                                    }
+                                }
                                 if (IRC.params[0] == "")
                                 {
                                     send(clients[i].get_fd_client(), "BOT <command>\n", 14, 0);
                                     break;
                                 }
 	                            std::cout << IRC.params[0] << std::endl;
-                                bot.handleMessage(clients[i], IRC.params[0]);
+                                bot.handleMessage(clients[i], IRC.params[0], chanel_tmp);
                                 break;
                             }
 

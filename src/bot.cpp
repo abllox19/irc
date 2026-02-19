@@ -6,7 +6,7 @@
 /*   By: abllox <abllox@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 20:42:47 by jmafueni          #+#    #+#             */
-/*   Updated: 2026/02/18 20:50:34 by abllox           ###   ########.fr       */
+/*   Updated: 2026/02/19 17:04:29 by abllox           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,19 @@ void Bot::cmdTime(Client& client)
 	sendPrivMsg(client, std::string("Server time: ") + std::ctime(&now));
 }
 
-void Bot::cmdUsers(Client& client, Chanel& server)
+void Bot::cmdUsers(Client& client, Chanel* server)
 {
-	(void)server;
-	sendPrivMsg(client, "Users command not implemented yet 👀");
+	std::vector<Client> clients;
+	clients = server->get_user();
+	std::string irc = name + " chanel users :";
+	for (size_t i = 0; i < clients.size(); i++)
+	{
+		irc += "\n";
+		irc += clients[i].get_nickname();
+	}
+	irc += "\r\n";
+
+	send(client.get_fd_client(), irc.c_str(), irc.size(), 0);
 }
 
 void Bot::cmdJoke(Client& client, int& i)
@@ -88,7 +97,7 @@ void Bot::cmdJoke(Client& client, int& i)
 
 
 
-void Bot::handleMessage(Client& client, std::string &cmd)
+void Bot::handleMessage(Client& client, std::string &cmd, Chanel* chanel)
 {
 	static int i = 0;
 
@@ -97,11 +106,11 @@ void Bot::handleMessage(Client& client, std::string &cmd)
 		cmdHello(client);
 	else if (cmd == "time")
 		cmdTime(client);
-	// else if (cmd == "users")
-	// {
-	// 	if (cmd[1] != "")
-	// 		cmdUsers(client, cmd[1]);
-	// }
+	else if (cmd == "users")
+	{
+		if (chanel)
+			cmdUsers(client, chanel);
+	}
 	else if (cmd == "joke")
 		cmdJoke(client, i);
 }
