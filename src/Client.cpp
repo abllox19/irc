@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asoumare <asoumare@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jmafueni <jmafueni@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/15 20:47:47 by asoumare          #+#    #+#             */
-/*   Updated: 2025/11/01 20:37:46 by asoumare         ###   ########.fr       */
+/*   Updated: 2026/02/23 19:46:24 by jmafueni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,9 +221,185 @@ void part_chanel(Client &client, Chanel *chanel, const std::string &name)
     std::cout << "Client " << client.get_nickname() << " a essayé de quitter " << name << " sans y être.\n";
 }
 
+bool parse_dcc_send(const std::string& msg, std::string& filename, std::string& ip, std::string& port, std::string& size)
+{
+	if (msg.size() < 2)
+		return false;
+    
+    if (msg.find("DCC SEND") == std::string::npos)
+    {
+        return false;
+    }
+    
+	std::stringstream ss(msg);
+	std::string dcc;
+	std::string send;
+
+	ss >> dcc >> send >> filename >> ip >> port >> size;
+
+	if (dcc != "DCC" || send != "SEND")
+		return false;
+
+	if (filename.empty() || ip.empty() || port.empty())
+		return false;
+
+	return true;
+}
+// PRIVMSG Job :\x01DCC SEND banned_word.txt 127001 5001 123\x01
+//  PRIVMSG Job :DCC SEND banned_word.txt 127001 5001 123
+
+// bool parse_dcc_send(const std::string& msg, std::string& filename, std::string& ip, std::string& port, std::string& size)
+// {
+//     std::string clean = msg;
+
+//     if (!clean.empty() && clean[0] == '\x01') {
+//         clean = clean.substr(1);
+//     }
+//     if (!clean.empty() && clean[clean.size() - 1] == '\x01') {
+//         clean = clean.substr(0, clean.size() - 1);
+//     }
+
+//     if (clean.find("DCC SEND") == std::string::npos) {
+//         return false;
+//     }
+
+//     std::stringstream ss(clean);
+//     std::string dcc, send;
+
+//     ss >> dcc >> send >> filename >> ip >> port >> size;
+
+//     if (dcc != "DCC" || send != "SEND") {
+//         return false;
+//     }
+
+//     if (filename.empty() || ip.empty() || port.empty()) {
+//         return false;
+//     }
+
+//     return true;
+// }
+
+int create_dcc_socket(int port)
+{
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0)
+        return -1;
+
+    int opt = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
+    sockaddr_in addr;
+    std::memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_port = htons(port);
+
+    if (bind(sock, (sockaddr*)&addr, sizeof(addr)) < 0)
+    {
+        close(sock);
+        return -1;
+    }
+
+    if (listen(sock, 1) < 0)
+    {
+        close(sock);
+        return -1;
+    }
+
+    return sock;
+}
+
+void send_file(int client_fd, const std::string& filename)
+{
+	std::ifstream file(filename.c_str(), std::ios::binary);
+	if (!file.is_open())
+		return;
+
+	char buffer[4096];
+
+	while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0)
+	{
+		int bytes = file.gcount();
+		int total = 0;
+
+		while (total < bytes)
+		{
+			int sent = send(client_fd, buffer + total, bytes - total, 0);
+			if (sent <= 0)
+				break;
+			total += sent;
+		}
+	}
+	file.close();
+}
+
+void start_dcc_server(const std::string& filename, int port)
+{
+	int sock = create_dcc_socket(port);
+	if (sock < 0)
+		return;
+
+	std::cout << "DCC waiting on port "
+			<< port << std::endl;
+
+	int client_fd = accept(sock, NULL, NULL);
+	if (client_fd < 0)
+	{
+		close(sock);
+		return;
+	}
+
+	send_file(client_fd, filename);
+    
+	std::cout << "File sent successfully\n";
+
+	close(client_fd);
+	close(sock);
+}
+
+void handle_dcc_send(const std::string& filename, const std::string& port)
+{
+	int port_num = atoi(port.c_str());
+	if (port_num <= 0)
+		return;
+
+	pid_t pid = fork();
+	if (pid == 0)
+	{
+		start_dcc_server(filename, port_num);
+		exit(0);
+	}
+}
 
 void privmsg(std::vector<Client> clients, std::vector<std::string> msg, Client client, std::vector<Chanel> chanels, std::string cmd)
 {
+    std::string filename, ip, port, size;
+    
+    if (parse_dcc_send(msg[1], filename, ip, port, size))
+    {
+        std::cout << "DCC SEND detected!" << std::endl;
+        std::cout << "File: " << filename << ", Port: " << port << std::endl;
+        int port_num = atoi(port.c_str());
+        start_dcc_server(filename, port_num);
+    }
+    
+    // std::string filename, ip, port, size;
+
+    // // 🔥 DCC detection
+    // size_t pos = cmd.find(" :");
+    // if (pos != std::string::npos)
+    // {
+    //     std::string content = cmd.substr(pos + 2);
+
+    //     if (parse_dcc_send(content, filename, ip, port, size))
+    //     {
+    //         std::cout << "DCC SEND detected!\n";
+
+    //         int port_num = atoi(port.c_str());
+    //         start_dcc_server(filename, port_num);
+    //     }
+    // }
+    
     if (!msg.empty() && !msg[0].empty() && msg[0][0] == '#')
     {
         std::string name = msg[0];

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parsing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abllox <abllox@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jmafueni <jmafueni@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 17:37:39 by jmafueni          #+#    #+#             */
-/*   Updated: 2026/02/18 17:16:59 by abllox           ###   ########.fr       */
+/*   Updated: 2026/02/22 19:55:34 by jmafueni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 # include "IRC_Serveur.hpp"
 # include "Chanel.hpp"
 # include "Client.hpp"
+# include "bot.hpp"
 
 struct ParsedCommand
 {

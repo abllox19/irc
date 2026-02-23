@@ -6,7 +6,7 @@
 /*   By: jmafueni <jmafueni@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/17 18:58:47 by jmafueni          #+#    #+#             */
-/*   Updated: 2026/02/18 17:12:02 by jmafueni         ###   ########.fr       */
+/*   Updated: 2026/02/19 19:30:43 by jmafueni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ void botfilterMessage(ParsedCommand& parse, std::string& message, const std::str
 		std::cerr << "Error: Could not open file " << filename << std::endl;
 		return;
 	}
-
+	
 	std::string banned;
 	while (std::getline(file, banned))
 	{

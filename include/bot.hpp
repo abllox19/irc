@@ -3,29 +3,39 @@
 /*                                                        :::      ::::::::   */
 /*   bot.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abllox <abllox@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jmafueni <jmafueni@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 20:42:30 by jmafueni          #+#    #+#             */
-/*   Updated: 2026/02/19 16:21:58 by abllox           ###   ########.fr       */
+/*   Updated: 2026/02/23 16:47:32 by jmafueni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 # include "Parsing.hpp"
-#include <ctime>
+# include <ctime>
+# include <pthread.h>
+# include <fstream>
+# include <arpa/inet.h>
+# include <unistd.h>
 
+// En haut de bot.hpp
+class Client;
+class Chanel;
 
 class Bot
 {
 	private:
 		std::string name;
 
-		void sendPrivMsg(Client& client, const std::string& msg);
-		void cmdHello(Client& client);
-		void cmdTime(Client& client);
-		void cmdUsers(Client& client, Chanel* server);
-		void cmdJoke(Client& client, int& i);
+		void sendfile(Client& sender, Client& target, const std::string& msg);
+		void	handle_dcc_send(const std::string& filename, const std::string& port);
+		void	start_dcc_server(const std::string& filename, int port);
+		void	sendPrivMsg(Client& client, const std::string& msg);
+		void	cmdHello(Client& client);
+		void	cmdTime(Client& client);
+		void	cmdUsers(Client& client, Chanel* server);
+		void	cmdJoke(Client& client, int& i);
 
 	public:
 		Bot();

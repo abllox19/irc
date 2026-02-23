@@ -12,11 +12,13 @@
 
 #pragma once 
 
-#include "Client.hpp"
+#include "Parsing.hpp"
 #include <iostream>
 #include <string>
 #include <cstdlib>
 #include <vector>
+
+class Client;
 
 class Chanel
 {
