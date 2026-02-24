@@ -6,7 +6,7 @@
 /*   By: jmafueni <jmafueni@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/11 20:42:47 by jmafueni          #+#    #+#             */
-/*   Updated: 2026/02/23 17:43:52 by jmafueni         ###   ########.fr       */
+/*   Updated: 2026/02/24 17:57:22 by jmafueni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,7 +286,7 @@ void Bot::sendPrivMsg(Client& client, const std::string& msg)
 	// {
 	// 	std::cout << "DCC SEND detected!" << std::endl;
 	// 	handle_dcc_send(filename, port);
-	// PRIVMSG Job :\x01DCC SEND banned_word.txt 127001 5001 123\x01
+	// PRIVMSG Job :DCC SEND banned_word.txt 127001 5001 123
 	// }
 
 	std::string irc = name + " PRIVMSG " + client.get_nickname() + " :" + msg + "\r\n";
@@ -307,8 +307,13 @@ void Bot::cmdTime(Client& client)
 
 void Bot::cmdUsers(Client& client, Chanel* server)
 {
-	std::vector<Client> clients;
-	clients = server->get_user();
+	if (!server)
+	{
+		std::cout << "Server pointer is NULL" << std::endl;
+		return;
+	}
+
+	std::vector<Client> clients = server->get_user();
 	std::string irc = name + " chanel users :";
 	for (size_t i = 0; i < clients.size(); i++)
 	{
@@ -316,7 +321,6 @@ void Bot::cmdUsers(Client& client, Chanel* server)
 		irc += clients[i].get_nickname();
 	}
 	irc += "\r\n";
-
 	send(client.get_fd_client(), irc.c_str(), irc.size(), 0);
 }
 

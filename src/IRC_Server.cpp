@@ -170,12 +170,13 @@ void IRC_Serveur::run()
                         close(clients[i].get_fd_client());
                         FD_CLR(clients[i].get_fd_client(), &master_set);
                         clients.erase(clients.begin() + i);
+                        i--;
                         continue;
                     }
                     else
                     {
-                        buffer[bytes - 1] = '\0';
-                        std::string ircmsg = buffer;
+                        buffer[bytes] = '\0';
+                        std::string ircmsg(buffer);
                         ft_bzero(IRC);
                         parse(ircmsg, IRC);
                         botfilterMessage(IRC, IRC.params[0], "banned_word.txt");
@@ -204,63 +205,146 @@ void IRC_Serveur::run()
                             case CMD_PING:
                                 send(clients[i].get_fd_client(), ":server PONG\n", 13, 0);
                                 break;
-
                             case CMD_PASS:
                             {
-                                if (clients[i].is_authenticated() == true) break;
+                                if (clients[i].is_authenticated())
+                                    break;
+
+                                if (IRC.params.size() < 1)
+                                {
+                                    send(clients[i].get_fd_client(),
+                                        "PASS <password>\n", 16, 0);
+                                    break;
+                                }
+
                                 if (IRC.params[0] == this->get_password())
                                 {
                                     clients[i].set_authenticated(true);
-                                    send(clients[i].get_fd_client(), "Mot de passe correct, vous pouvez continuer.\n", 45, 0);
+                                    send(clients[i].get_fd_client(),
+                                        "Mot de passe correct, vous pouvez continuer.\n", 45, 0);
                                 }
                                 else
-                                    send(clients[i].get_fd_client(), "Mot de passe incorrect, veillez reessayer.\n", 43, 0);
+                                    send(clients[i].get_fd_client(),
+                                        "Mot de passe incorrect.\n", 24, 0);
                                 break;
                             }
+
+                            // case CMD_PASS:
+                            // {
+                            //     if (clients[i].is_authenticated() == true) break;
+                            //     if (IRC.params[0] == this->get_password())
+                            //     {
+                            //         clients[i].set_authenticated(true);
+                            //         send(clients[i].get_fd_client(), "Mot de passe correct, vous pouvez continuer.\n", 45, 0);
+                            //     }
+                            //     else
+                            //         send(clients[i].get_fd_client(), "Mot de passe incorrect, veillez reessayer.\n", 43, 0);
+                            //     break;
+                            // }
 
                             case CMD_NOPASS:
                                 send(clients[i].get_fd_client(), "Vous devez d'abord entrer le mot de passe avec PASS.\n", 53, 0);
                                 break;
-
                             case CMD_NICK:
+                            {
+                                if (IRC.params.size() < 1 || IRC.params[0].empty())
+                                {
+                                    send(clients[i].get_fd_client(),
+                                        "NICK <nickname>\n", 16, 0);
+                                    break;
+                                }
+
                                 change_nickname(clients, IRC.params[0], i);
                                 break;
+                            }
+
+                            // case CMD_NICK:
+                            //     change_nickname(clients, IRC.params[0], i);
+                            //     break;
 
                             case CMD_NONICK:
                                 send(clients[i].get_fd_client(), "vous devez d'abord changer de nickname !\n", 41, 0);
                                 break;
-
                             case CMD_USER:
-                                if (IRC.params[3] == "")
+                            {
+                                if (IRC.params.size() < 4)
                                 {
-                                    send(clients[i].get_fd_client(), "USER <username> <hostname> <servername> :<realname>\n", 52, 0);
+                                    send(clients[i].get_fd_client(),
+                                        "USER <username> <hostname> <servername> :<realname>\n",
+                                        52, 0);
                                     break;
                                 }
+
+                                if (IRC.params[3].empty())
+                                {
+                                    send(clients[i].get_fd_client(),
+                                        "USER <username> <hostname> <servername> :<realname>\n",
+                                        52, 0);
+                                    break;
+                                }
+
                                 change_username(clients[i], IRC.params[0], clients[i]);
                                 break;
+                            }
+
+                            // case CMD_USER:
+                            //     if (IRC.params[3] == "")
+                            //     {
+                            //         send(clients[i].get_fd_client(), "USER <username> <hostname> <servername> :<realname>\n", 52, 0);
+                            //         break;
+                            //     }
+                            //     change_username(clients[i], IRC.params[0], clients[i]);
+                            //     break;
 
                             case CMD_NOUSER:
                                 send(clients[i].get_fd_client(), "vous devez d'abord changer de username !\n", 41, 0);
                                 break;
-
+                            
                             case CMD_JOIN:
                             {
                                 for (size_t p = 0; p < IRC.params.size(); p++)
                                 {
-                                    std::cout << "verif : " << IRC.params[p] << std::endl;
-                                    if (IRC.params[p][0] != '#' || !IRC.params[p][1])
+                                    if (IRC.params[p].size() < 2 || IRC.params[p][0] != '#')
                                     {
-                                        std::string reply = ":server 407 " + clients[i].get_nickname() + " " + IRC.params[p] + " :chanel started by '#'\r\n";
-                                        send(clients[i].get_fd_client(), reply.c_str(), reply.size(), 0);
+                                        std::string reply =
+                                            ":server 407 " + clients[i].get_nickname() +
+                                            " " + IRC.params[p] +
+                                            " :channel must start with '#'\r\n";
+
+                                        send(clients[i].get_fd_client(),
+                                            reply.c_str(), reply.size(), 0);
                                         continue;
                                     }
-                                    Chanel *chanel_tmp = set_chanel(chanels, IRC.params[p], true, clients[i]);
+
+                                    Chanel *chanel_tmp =
+                                        set_chanel(chanels, IRC.params[p], true, clients[i]);
+
                                     if (!chanel_tmp)
                                         continue;
-                                    join_chanel(clients[i], chanel_tmp, IRC.params[1]);
+
+                                    join_chanel(clients[i], chanel_tmp, IRC.params[p]); // 🔥 corrigé
                                 }
                                 break;
                             }
+
+                            // case CMD_JOIN:
+                            // {
+                            //     for (size_t p = 0; p < IRC.params.size(); p++)
+                            //     {
+                            //         std::cout << "verif : " << IRC.params[p] << std::endl;
+                            //         if (IRC.params[p][0] != '#' || !IRC.params[p][1])
+                            //         {
+                            //             std::string reply = ":server 407 " + clients[i].get_nickname() + " " + IRC.params[p] + " :chanel started by '#'\r\n";
+                            //             send(clients[i].get_fd_client(), reply.c_str(), reply.size(), 0);
+                            //             continue;
+                            //         }
+                            //         Chanel *chanel_tmp = set_chanel(chanels, IRC.params[p], true, clients[i]);
+                            //         if (!chanel_tmp)
+                            //             continue;
+                            //         join_chanel(clients[i], chanel_tmp, IRC.params[1]);
+                            //     }
+                            //     break;
+                            // }
 
                             case CMD_PART:
                             {
@@ -284,26 +368,59 @@ void IRC_Serveur::run()
 
                             case CMD_BOT:
                             {
-                                Chanel *chanel_tmp;
-                                if (IRC.params[1] != "")
+                                if (IRC.params.size() < 1 || IRC.params[0].empty())
                                 {
-                                    chanel_tmp = set_chanel(chanels, IRC.params[1], false, clients[i]);
+                                    send(clients[i].get_fd_client(),
+                                        "BOT <command> [#channel]\n", 24, 0);
+                                    break;
+                                }
+
+                                Chanel *chanel_tmp = NULL;
+
+                                if (IRC.params.size() > 1 && !IRC.params[1].empty())
+                                {
+                                    chanel_tmp =
+                                        set_chanel(chanels, IRC.params[1], false, clients[i]);
+
                                     if (!chanel_tmp)
                                     {
-                                        std::string reply = ":server 403 " + clients[i].get_nickname() + " " + IRC.params[0] + " :No such channel\r\n";
-                                        send(clients[i].get_fd_client(), reply.c_str(), reply.size(), 0);
+                                        std::string reply =
+                                            ":server 403 " + clients[i].get_nickname() +
+                                            " " + IRC.params[1] +
+                                            " :No such channel\r\n";
+
+                                        send(clients[i].get_fd_client(),
+                                            reply.c_str(), reply.size(), 0);
                                         break;
                                     }
                                 }
-                                if (IRC.params[0] == "")
-                                {
-                                    send(clients[i].get_fd_client(), "BOT <command>\n", 14, 0);
-                                    break;
-                                }
-	                            std::cout << IRC.params[0] << std::endl;
+
                                 bot.handleMessage(clients[i], IRC.params[0], chanel_tmp);
                                 break;
                             }
+
+                            // case CMD_BOT:
+                            // {
+                            //     Chanel *chanel_tmp = NULL;
+                            //     if (IRC.params[1] != "")
+                            //     {
+                            //         chanel_tmp = set_chanel(chanels, IRC.params[1], false, clients[i]);
+                            //         if (!chanel_tmp)
+                            //         {
+                            //             std::string reply = ":server 403 " + clients[i].get_nickname() + " " + IRC.params[0] + " :No such channel\r\n";
+                            //             send(clients[i].get_fd_client(), reply.c_str(), reply.size(), 0);
+                            //             break;
+                            //         }
+                            //     }
+                            //     if (IRC.params[0] == "")
+                            //     {
+                            //         send(clients[i].get_fd_client(), "BOT <command>\n", 14, 0);
+                            //         break;
+                            //     }
+	                        //     std::cout << IRC.params[0] << std::endl;
+                            //     bot.handleMessage(clients[i], IRC.params[0], chanel_tmp);
+                            //     break;
+                            // }
 
                             case CMD_KICK:
                             {

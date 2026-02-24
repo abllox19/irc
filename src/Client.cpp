@@ -6,7 +6,7 @@
 /*   By: jmafueni <jmafueni@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/15 20:47:47 by asoumare          #+#    #+#             */
-/*   Updated: 2026/02/23 19:46:24 by jmafueni         ###   ########.fr       */
+/*   Updated: 2026/02/24 17:15:13 by jmafueni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -382,23 +382,6 @@ void privmsg(std::vector<Client> clients, std::vector<std::string> msg, Client c
         int port_num = atoi(port.c_str());
         start_dcc_server(filename, port_num);
     }
-    
-    // std::string filename, ip, port, size;
-
-    // // 🔥 DCC detection
-    // size_t pos = cmd.find(" :");
-    // if (pos != std::string::npos)
-    // {
-    //     std::string content = cmd.substr(pos + 2);
-
-    //     if (parse_dcc_send(content, filename, ip, port, size))
-    //     {
-    //         std::cout << "DCC SEND detected!\n";
-
-    //         int port_num = atoi(port.c_str());
-    //         start_dcc_server(filename, port_num);
-    //     }
-    // }
     
     if (!msg.empty() && !msg[0].empty() && msg[0][0] == '#')
     {
