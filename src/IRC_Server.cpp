@@ -179,8 +179,6 @@ void IRC_Serveur::run()
                         std::string ircmsg(buffer);
                         ft_bzero(IRC);
                         parse(ircmsg, IRC);
-                        botfilterMessage(IRC, IRC.params[0], "banned_word.txt");
-                        std::cout << "commande du client " << clients[i].get_nickname() << " : " << IRC.params[0] << std::endl;
                         std::cout << "commande du client " << clients[i].get_nickname() << " : " << buffer << std::endl;
                         Command cmd = parse_command(IRC.command.c_str(), clients[i]);
 
@@ -280,7 +278,7 @@ void IRC_Serveur::run()
                             
                             case CMD_JOIN:
                             {
-                                for (size_t p = 0; p < IRC.params.size(); p++)
+                                for (size_t p = 0; p < IRC.params.size() -1; p++)
                                 {
                                     if (IRC.params[p].size() < 2 || IRC.params[p][0] != '#')
                                     {
@@ -326,7 +324,7 @@ void IRC_Serveur::run()
 
                             case CMD_PART:
                             {
-                                for (size_t p = 0; p < IRC.params.size(); p++)
+                                for (size_t p = 0; p < IRC.params.size() -1; p++)
                                 {
                                     Chanel *chanel_tmp = set_chanel(chanels, IRC.params[p], false, clients[i]);
                                     if (!chanel_tmp)
@@ -341,6 +339,9 @@ void IRC_Serveur::run()
                             }
 
                             case CMD_PRIVMSG:
+
+                                if (IRC.params[0] == "")
+                                    break;
                                 privmsg(clients, IRC.params, clients[i], chanels, IRC.command);
                                 break;
 
