@@ -12,8 +12,8 @@ OBJDIR      = obj
 
 # Compilateur & flags
 CXX         = c++
-CXXFLAGS    = -Wall -Wextra -Werror -std=c++98 -I$(INCDIR) -MMD -MP
-LDFLAGS     =
+CXXFLAGS    = -Wall -Wextra -Werror -std=c++98 -fsanitize=undefined,address -I$(INCDIR) -MMD -MP
+LDFLAGS     = -fsanitize=undefined,address
 
 # Sources / Objets / Dépendances (auto)
 SRCS        = $(wildcard $(SRCDIR)/*.cpp)
